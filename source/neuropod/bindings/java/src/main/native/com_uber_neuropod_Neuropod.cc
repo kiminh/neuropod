@@ -30,9 +30,24 @@ limitations under the License.
 
 #include <jni.h>
 
-// TODO(vkuzmin): fix this
-// NOLINTNEXTLINE(google-build-using-namespace)
-using namespace neuropod::jni;
+using neuropod::jni::com_uber_neuropod_Dimension;
+using neuropod::jni::com_uber_neuropod_Dimension_symbol_;
+using neuropod::jni::com_uber_neuropod_Dimension_value_;
+using neuropod::jni::com_uber_neuropod_NeuropodTensor;
+using neuropod::jni::com_uber_neuropod_NeuropodTensor_;
+using neuropod::jni::com_uber_neuropod_NeuropodTensor_getHandle;
+using neuropod::jni::com_uber_neuropod_TensorSpec;
+using neuropod::jni::com_uber_neuropod_TensorSpec_;
+using neuropod::jni::java_util_ArrayList;
+using neuropod::jni::java_util_ArrayList_;
+using neuropod::jni::java_util_ArrayList_add;
+using neuropod::jni::java_util_ArrayList_get;
+using neuropod::jni::java_util_ArrayList_size;
+using neuropod::jni::java_util_HashMap;
+using neuropod::jni::java_util_HashMap_;
+using neuropod::jni::java_util_HashMap_put;
+using neuropod::jni::java_util_Map_Entry_getKey;
+using neuropod::jni::java_util_Map_Entry_getValue;
 
 namespace
 {
@@ -42,7 +57,7 @@ jobject toJavaTensorSpecList(JNIEnv *env, const std::vector<neuropod::TensorSpec
     jobject ret = env->NewObject(java_util_ArrayList, java_util_ArrayList_, specs.size());
     for (const auto &tensorSpec : specs)
     {
-        auto    type = get_tensor_type_field(env, tensor_type_to_string(tensorSpec.type));
+        auto    type = neuropod::jni::get_tensor_type_field(env, neuropod::jni::tensor_type_to_string(tensorSpec.type));
         jstring name = env->NewStringUTF(tensorSpec.name.c_str());
         jobject dims = env->NewObject(java_util_ArrayList, java_util_ArrayList_, tensorSpec.dims.size());
         for (const auto &dim : tensorSpec.dims)
@@ -90,13 +105,13 @@ JNIEXPORT jlong JNICALL Java_com_uber_neuropod_Neuropod_nativeNew__Ljava_lang_St
         {
             opts = *reinterpret_cast<neuropod::RuntimeOptions *>(optHandle);
         }
-        auto                convertedPath = to_string(env, path);
+        auto                convertedPath = neuropod::jni::to_string(env, path);
         neuropod::Neuropod *ret           = new neuropod::Neuropod(convertedPath, opts);
         return reinterpret_cast<jlong>(ret);
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return reinterpret_cast<jlong>(nullptr);
 }
@@ -111,7 +126,7 @@ JNIEXPORT void JNICALL Java_com_uber_neuropod_Neuropod_nativeDelete(JNIEnv *env,
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
 }
 
@@ -125,7 +140,7 @@ JNIEXPORT void JNICALL Java_com_uber_neuropod_Neuropod_nativeLoadModel(JNIEnv *e
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
 }
 
@@ -139,7 +154,7 @@ JNIEXPORT jstring JNICALL Java_com_uber_neuropod_Neuropod_nativeGetName(JNIEnv *
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return nullptr;
 }
@@ -154,7 +169,7 @@ JNIEXPORT jstring JNICALL Java_com_uber_neuropod_Neuropod_nativeGetPlatform(JNIE
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return nullptr;
 }
@@ -170,7 +185,7 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeGetInputs(JNIEnv
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return nullptr;
 }
@@ -186,7 +201,7 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeGetOutputs(JNIEn
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return nullptr;
 }
@@ -197,11 +212,11 @@ JNIEXPORT jlong JNICALL Java_com_uber_neuropod_Neuropod_nativeGetAllocator(JNIEn
     try
     {
         auto model = reinterpret_cast<neuropod::Neuropod *>(handle);
-        return reinterpret_cast<jlong>(toHeap(model->get_tensor_allocator()));
+        return reinterpret_cast<jlong>(neuropod::jni::toHeap(model->get_tensor_allocator()));
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return reinterpret_cast<jlong>(nullptr);
 }
@@ -212,11 +227,11 @@ JNIEXPORT jlong JNICALL Java_com_uber_neuropod_Neuropod_nativeGetGenericAllocato
     try
     {
         std::shared_ptr<neuropod::NeuropodTensorAllocator> allocator = neuropod::get_generic_tensor_allocator();
-        return reinterpret_cast<jlong>(toHeap(allocator));
+        return reinterpret_cast<jlong>(neuropod::jni::toHeap(allocator));
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return reinterpret_cast<jlong>(nullptr);
 }
@@ -236,7 +251,7 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeInfer(
             {
                 jstring element =
                     static_cast<jstring>(env->CallObjectMethod(requestedOutputsJava, java_util_ArrayList_get, i));
-                requestedOutputs.emplace_back(to_string(env, element));
+                requestedOutputs.emplace_back(neuropod::jni::to_string(env, element));
                 env->DeleteLocalRef(element);
             }
         }
@@ -247,8 +262,8 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeInfer(
         for (jsize i = 0; i < entrySize; i++)
         {
             jobject     entry = env->GetObjectArrayElement(entryArray, i);
-            std::string key =
-                to_string(env, static_cast<jstring>(env->CallObjectMethod(entry, java_util_Map_Entry_getKey)));
+            std::string key   = neuropod::jni::to_string(
+                env, static_cast<jstring>(env->CallObjectMethod(entry, java_util_Map_Entry_getKey)));
             jobject value        = env->CallObjectMethod(entry, java_util_Map_Entry_getValue);
             jlong   tensorHandle = env->CallLongMethod(value, com_uber_neuropod_NeuropodTensor_getHandle);
             if (tensorHandle == 0)
@@ -270,7 +285,7 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeInfer(
         {
             jobject javaTensor = env->NewObject(com_uber_neuropod_NeuropodTensor,
                                                 com_uber_neuropod_NeuropodTensor_,
-                                                reinterpret_cast<jlong>(toHeap(entry.second)));
+                                                reinterpret_cast<jlong>(neuropod::jni::toHeap(entry.second)));
             env->CallObjectMethod(ret, java_util_HashMap_put, env->NewStringUTF(entry.first.c_str()), javaTensor);
             env->DeleteLocalRef(javaTensor);
         }
@@ -278,7 +293,7 @@ JNIEXPORT jobject JNICALL Java_com_uber_neuropod_Neuropod_nativeInfer(
     }
     catch (const std::exception &e)
     {
-        throw_java_exception(env, e.what());
+        neuropod::jni::throw_java_exception(env, e.what());
     }
     return nullptr;
 }
